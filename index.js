@@ -1,4 +1,8 @@
 
+function toggleNode(node) {
+  node.style.display = node.style.display === "block" ? "none" : "block";
+}
+
 function getNodeView(node) {
   const result = document.createElement("div");
   const title = document.createElement("div");
@@ -7,17 +11,31 @@ function getNodeView(node) {
   if (typeof node === "string") {
     title.appendChild(document.createTextNode(node));
     result.appendChild(title);
+    return result;
   }
-  else {
-    const selfClosed = node.state = NODE_STATE.selfClosed;
-    if (selfClosed) {
-      title.style.cursor = "pointer";
-    }
-    title.appendChild(document.createTextNode(
-      `<${node.tagName} ${node.attributes.join(" ")}${selfClosed ? " /" : ""}>`
-    ));
-    result.appendChild(title);
-    result.appendChild(getTreeView(node.children));
+
+  title.style.color = "#9C27B0";
+  const selfClosed = node.state === NODE_STATE.selfClosed;
+
+  title.appendChild(document.createTextNode(
+    `<${node.tagName} ${node.attributes.join(" ")}${selfClosed ? " /" : ""}>`
+  ));
+  result.appendChild(title);
+
+  if (node.children.length > 0) {
+    title.classList.add("view__title-expandable");
+    const childrenTree = getTreeView(node.children);
+    result.appendChild(childrenTree);
+
+    const expandMarker = document.createElement("div");
+    expandMarker.innerText = "...";
+    expandMarker.style.display = "none";
+
+    title.appendChild(expandMarker);
+    title.addEventListener("click", () => {
+      toggleNode(childrenTree);
+      toggleNode(expandMarker);
+    });
   }
   return result;
 }
@@ -31,11 +49,15 @@ function getNodeView(node) {
     textBeforeTag: string;
     children: (object | string)[]
   })[]} contentTree
-  @returns {object} DOM element
+  @returns {object | null} DOM element or null
  */
 function getTreeView(contentTree) {
+  if (contentTree.length === 0) {
+    return null;
+  }
   const result = document.createElement("div");
   result.style.marginLeft = 20;
+  result.style.display = "block";
 
   contentTree.forEach(node => {
     result.appendChild(getNodeView(node));
@@ -53,9 +75,15 @@ window.onload = () => {
     error.innerHTML = "";
     try {
       view.innerHTML = "";
-      console.log(parseHtml(textarea.value));
-      view.appendChild(getTreeView(parseHtml(textarea.value)));
-      view.style.visibility = "visible";
+      const contentTree = parseHtml(textarea.value);
+
+      if (contentTree.length > 0) {
+        view.appendChild(getTreeView(contentTree));
+        view.style.visibility = "visible";
+      }
+      else {
+        view.style.visibility = "hidden";
+      }
     }
     catch (e) {
       view.style.visibility = "hidden";
