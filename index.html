@@ -1,8 +1,34 @@
 <html>
     <head>
+        <style>
+            #view {
+                visibility: hidden;
+                display: inline-block;
+                width: 48%;
+                min-height: 300px;
+                margin-left: 1%;
+                border: 1px solid rgb(169, 169, 169);
+                vertical-align: top;
+                padding: 5px 0;
+                box-sizing: border-box;
+            }
+            .view__title {
+                display: inline-block;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                padding: 1px 7px;
+            }
+        </style>
     </head>
     <body>
-        <div id="root"></div>
+        <div id="root">
+            <div>Insert html to parse:</div>
+            <textarea id="textarea" rows="20" style="width: 50%"></textarea>
+            <div id="view"></div>
+        </div>
+        <div id="error" style="color: red"></div>
+        <script src="./parser.js"></script>
         <script src="./index.js"></script>
+        <script src="./test.js"></script>
     </body>
 </html>
