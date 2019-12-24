@@ -1,13 +1,4 @@
 /**
- * search the selector in the contentTree
- * @param {string} selector
- * @returns {HTMLDivElement} DOM node representing the selector
- */
-function searchSelector(selector, contentTree) {
-
-}
-
-/**
  * @param {{
     tagName: string;
     state: number;
@@ -15,24 +6,35 @@ function searchSelector(selector, contentTree) {
   }} node
  * @returns {HTMLDivElement}
  */
-function getTagDescriptionView(node) {
-  const titleContent = document.createElement("span");
-  titleContent.appendChild(document.createTextNode(`<${node.tagName}`));
+function getTagDescriptionElement(node) {
+  const result = document.createElement("span");
+  result.appendChild(document.createTextNode(`<${node.tagName}`));
 
   node.attributes.forEach(a => {
     const name = document.createElement("span");
     name.classList.add("view__attrName");
     name.innerText = ` ${a.name}=`;
-    titleContent.appendChild(name);
+    result.appendChild(name);
 
     const value = document.createElement("span");
     value.classList.add("view__attrValue");
     value.innerText = `"${a.value}"`;
-    titleContent.appendChild(value);
+    result.appendChild(value);
   });
 
-  titleContent.appendChild(document.createTextNode(`${node.state === NODE_STATE.selfClosed ? " /" : ""}>`));
-  return titleContent;
+  result.appendChild(document.createTextNode(`${node.state === NODE_STATE.selfClosed ? " /" : ""}>`));
+  return result;
+}
+
+/**
+ * @returns {HTMLDivElement}
+ */
+function getExpandMarkerElement() {
+  const result = document.createElement("div");
+  result.classList.add("view__expandMarker");
+  result.innerText = "...";
+  result.style.display = "none";
+  return result;
 }
 
 /**
@@ -63,7 +65,7 @@ function getNodeView(node) {
     titleContent = document.createTextNode(node);
   }
   else {// if node is object
-    titleContent = getTagDescriptionView(node);
+    titleContent = getTagDescriptionElement(node);
   }
 
   title.appendChild(titleContent);
@@ -72,12 +74,9 @@ function getNodeView(node) {
   // if node has children
   if (node.children && node.children.length > 0) {
     title.classList.add("view__title-expandable");
-    const childrenTreeElement = getTreeView(node.children);
 
-    const expandMarkerElement = document.createElement("div");
-    expandMarkerElement.classList.add("view__expandMarker");
-    expandMarkerElement.innerText = "...";
-    expandMarkerElement.style.display = "none";
+    const childrenTreeElement = getTreeView(node.children);
+    const expandMarkerElement = getExpandMarkerElement();
 
     title.appendChild(expandMarkerElement);
     title.addEventListener("click", () => {
@@ -87,7 +86,6 @@ function getNodeView(node) {
 
     result.appendChild(childrenTreeElement);
   }
-
   return result;
 }
 
@@ -116,11 +114,6 @@ window.onload = () => {
   const textarea = document.getElementById("textarea");
   const error = document.getElementById("error");
   const view = document.getElementById("view");
-  const search = document.getElementById("search");
-
-  search.addEventListener("keyup", () => {
-    searchSelector(search.value);
-  });
 
   textarea.addEventListener("keyup", () => {
     error.innerHTML = "";
@@ -131,7 +124,6 @@ window.onload = () => {
       if (contentTree.length > 0) {
         view.appendChild(getTreeView(contentTree));
         view.style.visibility = "visible";
-        search.style.visibility = "visible";
       }
       else {
         throw new Error(`Content tree is empty`);
@@ -139,7 +131,6 @@ window.onload = () => {
     }
     catch (e) {
       view.style.visibility = "hidden";
-      search.style.visibility = "hidden";
       error.innerText = e.message;
     }
   });

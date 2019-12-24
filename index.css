@@ -10,12 +10,6 @@ body {
   position: relative;
 }
 
-#search {
-  visibility: hidden;
-  position: absolute;
-  right: 0;
-}
-
 .container {
   display: flex;
   justify-content: space-between;
