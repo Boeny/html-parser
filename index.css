@@ -2,6 +2,25 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+#root {
+  padding: 0 15p;
+}
+
+#root h3 {
+  position: relative;
+}
+
+#search {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+}
+
+.container {
+  display: flex;
+  justify-content: space-between;
+}
+
 #textarea {
   width: 50%;
 }
@@ -24,18 +43,35 @@ body {
 
 .view__title {
   display: inline-block;
+  color: #9C27B0;
   user-select: none;
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 1px 7px;
 }
+
+.view__attrName {
+  color: rgb(173, 134, 25);
+}
+
+.view__attrValue {
+  color: rgb(79, 134, 206);
+}
+
+.view__title-text {
+  color: black;
+}
+
 .view__title-expandable {
   cursor: pointer;
 }
+
 .view__title-expandable:hover {
   background: #ccc;
 }
-.view__title-expandable div {
+
+.view__expandMarker {
   margin-left: 12px;
   font-weight: bold;
+  font-size: 19px;
 }

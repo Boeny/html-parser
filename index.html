@@ -1,15 +1,18 @@
 <html>
-    <head>
-        <link rel="stylesheet" href="./index.css" />
-    </head>
-    <body>
-        <div id="root">
-            <div>Insert html to parse:</div>
-            <textarea id="textarea" rows="20"></textarea>
-            <div id="view"></div>
-        </div>
-        <div id="error"></div>
-        <script src="./parser.js"></script>
-        <script src="./index.js"></script>
-    </body>
+  <head>
+    <link rel="stylesheet" href="./index.css" />
+  </head>
+  <body>
+    <div id="root">
+      <h3>Insert html to parse: <input id="search" value="" placeholder="Enter selector" /></h3>
+      <div class="container">
+        <textarea id="textarea" rows="20"></textarea>
+        <div id="view"></div>
+      </div>
+    </div>
+    <div id="error"></div>
+
+    <script src="./parser.js"></script>
+    <script src="./index.js"></script>
+  </body>
 </html>
