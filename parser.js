@@ -35,26 +35,27 @@ function getTagState(tagText) {
 /**
  * @param {string} tagName
  * @param {string[]} tagAttrs
+ * @returns {{ name: string, value: string }[]} attributes
  * @throws {Error} - invalid attr, incorrect attr
  */
 function getTagAttributes(tagName, tagAttrs) {
   const validAttr = VALID_ATTR[tagName];
 
   return tagAttrs.map(a => {
-    const attr = a.split(`="`);
-    const attrName = attr[0];
+    const attrParts = a.split(`="`);
+    const name = attrParts[0];
 
-    if (!validAttr.includes(attrName)) {
-      throw new Error(`Attribute "${attrName}" is not valid for <${tagName}> tag!`);
+    if (!validAttr.includes(name)) {
+      throw new Error(`Attribute "${name}" is not valid for <${tagName}> tag!`);
     }
-    if (attr.length > 1) {
-      const value = attr[1];
+    if (attrParts.length > 1) {
+      const value = attrParts[1];
 
       if (value.match(/.*"$/)) {
-        return `${attrName}="${value.slice(0, -1)}"`;
+        return { name, value: value.slice(0, -1) };
       }
     }
-    throw new Error(`Incorrect "${attrName}" attribute ${a} in <${tagName}> tag!`);
+    throw new Error(`Incorrect "${name}" attribute ${a} in <${tagName}> tag!`);
   });
 }
 
@@ -109,7 +110,7 @@ function getNextTag(text) {
 }
 
 function saveInnerText(lastStackElem, nextTag) {
-  if (lastStackElem && nextTag.textBeforeTag !== "") {
+  if (lastStackElem && nextTag.textBeforeTag.replace(/[\r\n\s]+/g, "") !== "") {
     lastStackElem.children.push(nextTag.textBeforeTag);
   }
 }
