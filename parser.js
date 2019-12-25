@@ -82,7 +82,7 @@ function getNextTag(text) {
   tagName = tagName[0];
 
   if (!VALID_TAGS.includes(tagName)) {
-      throw new Error(`Tag <${tagName}> is not valid${`<${tagName}>` !== tagText ? ` (used as ${tagText})` : ""}!`);
+    throw new Error(`Tag <${tagName}> is not valid${`<${tagName}>` !== tagText ? ` (used as ${tagText})` : ""}!`);
   }
   const state = getTagState(tagText);
   const attrRegexp = /[^\s]+="[^"]*"/g;
@@ -109,6 +109,11 @@ function getNextTag(text) {
   };
 }
 
+/**
+ * sets the text before the nextTag as a child of the lastStackElem
+ * @param {{ children: any[] } | null} lastStackElem
+ * @param {{ textBeforeTag: string }} nextTag
+ */
 function saveInnerText(lastStackElem, nextTag) {
   if (lastStackElem && nextTag.textBeforeTag.replace(/[\r\n\s]+/g, "") !== "") {
     lastStackElem.children.push(nextTag.textBeforeTag);
@@ -117,7 +122,17 @@ function saveInnerText(lastStackElem, nextTag) {
 
 /**
  * @param {string} text to parse
- * @returns {object[]} ContentTree
+ * @returns {{
+    tagName: string;
+    tagText: string;
+    state: number;
+    attributes: {
+        name: string;
+        value: string;
+    }[];
+    textBeforeTag: string;
+    children: any[];
+ * }[]} ContentTree
  * @throws {Error} - stack, overflow, no opened tag, different opened and closed tags
  */
 function parseHtml(html) {
