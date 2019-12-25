@@ -74,15 +74,10 @@ function getNodeView(node, update) {
   if (node.children && node.children.length > 0) {
     title.classList.add("view__title-expandable");
 
-    const expandMarkerElement = node.opened ? null : getExpandMarkerElement();
-    if (expandMarkerElement) {
-      title.appendChild(expandMarkerElement);
+    if (node.opened) {
+      title.appendChild(getExpandMarkerElement());
+      result.appendChild(getTreeView(node.children, update));
     }
-    const childrenTreeElement = node.opened ? getTreeView(node.children, update) : null;
-    if (childrenTreeElement) {
-      result.appendChild(childrenTreeElement);
-    }
-
     title.addEventListener("click", () => {
       node.opened = !node.opened;
       update();
