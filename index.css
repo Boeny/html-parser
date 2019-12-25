@@ -10,6 +10,12 @@ body {
   position: relative;
 }
 
+#search {
+  visibility: hidden;
+  position: absolute;
+  right: 0;
+}
+
 .container {
   display: flex;
   justify-content: space-between;
@@ -44,12 +50,23 @@ body {
   padding: 1px 7px;
 }
 
+.view__title-selected {
+  color: #fff;
+  background: #5b5bd4;
+}
+
 .view__attrName {
   color: rgb(173, 134, 25);
+}
+.view__title-selected .view__attrName {
+  color: #fff;
 }
 
 .view__attrValue {
   color: rgb(79, 134, 206);
+}
+.view__title-selected .view__attrValue {
+  color: #fff;
 }
 
 .view__title-text {
