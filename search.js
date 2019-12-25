@@ -3,7 +3,7 @@
  * @returns {{ token: string | null, index: number } last token
  */
 function parseLastToken(text) {
-  const matches = text.trim().match(/[\#\.]?[\w\-\_]+$/);
+  const matches = text.trim().match(/^[\#\.]?[\w\-\_]+$/);
   return {
     token: matches ? matches[0] : null,
     index: matches ? matches.index : 0
@@ -13,46 +13,60 @@ function parseLastToken(text) {
 /**
  * @param {{
     selected?: boolean;
+    opened: boolean;
     tagName: string;
     state: number;
     attributes: { name: string, value: string }[];
     children: (object | string)[]
   }[]} contentTree
  * @param {string} token
+ @returns {boolean} found
  */
 function findAllByToken(contentTree, token) {
-  const result = [];
+  let found = false;
 
   contentTree.forEach(node => {
     if (typeof node === "string") {
-      result.push(node);
       return;
     }
-    const resultNode = { ...node };
+    node.selected = undefined;
 
-    if (resultNode.tagName === token) {
-      resultNode.selected = true;
+    if (node.tagName === token) {
+      found = true;
+      node.selected = true;
     }
-    if (resultNode.attributes.length > 0) {
-      resultNode.attributes.forEach(a => {
+    if (node.attributes.length > 0) {
+      node.attributes.forEach(a => {
         if (a.name === "id" && `#${a.value}` === token || a.name === "class" && `.${a.value}` === token) {
-          resultNode.selected = true;
+          found = true;
+          node.selected = true;
         }
       });
     }
-    if (resultNode.children.length > 0) {
-      resultNode.children = findAllByToken(resultNode.children, token);
+    if (findAllByToken(node.children, token)) {
+      found = true;
+      node.opened = true;
     }
-    result.push(resultNode);
   });
 
-  return result;
+  return found;
+}
+
+function clearSelected(contentTree) {
+  contentTree.forEach(node => {
+    if (typeof node === "string") {
+      return;
+    }
+    node.selected = undefined;
+    clearSelected(node.children);
+  });
 }
 
 /**
  * search the selector in the contentTree
  * @param {{
     selected?: boolean;
+    opened: boolean;
     tagName: string;
     state: number;
     attributes: { name: string, value: string }[];
@@ -62,16 +76,14 @@ function findAllByToken(contentTree, token) {
  */
 function findAllBySelector(contentTree, selector) {
   let text = selector;
-  let result = contentTree.slice();
   do {
     const { token, index } = parseLastToken(text);
     if (!token) {
-      return null;
+      clearSelected(contentTree);
+      return;
     }
-    result = findAllByToken(result, token);
+    findAllByToken(contentTree, token);
     text = text.slice(0, index);
   }
   while (text);
-
-  return result;
 }
