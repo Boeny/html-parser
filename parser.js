@@ -103,7 +103,8 @@ function getNextTag(text) {
       state,
       attributes: getTagAttributes(tagName, tagAttrs),
       textBeforeTag: text.slice(0, matches.index),
-      children: []
+      children: [],
+      opened: true
     },
     restText: text.slice(matches.index + tagText.length)
   };
@@ -132,6 +133,7 @@ function saveInnerText(lastStackElem, nextTag) {
     }[];
     textBeforeTag: string;
     children: any[];
+    opened: boolean;
  * }[]} ContentTree
  * @throws {Error} - stack, overflow, no opened tag, different opened and closed tags
  */

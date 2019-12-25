@@ -33,28 +33,22 @@ function getExpandMarkerElement() {
   const result = document.createElement("div");
   result.classList.add("view__expandMarker");
   result.innerText = "...";
-  result.style.display = "none";
   return result;
-}
-
-/**
- * @param {HTMLDivElement} node
- */
-function toggleElement(node) {
-  node.style.display = node.style.display === "block" ? "none" : "block";
 }
 
 /**
  * @param {string | {
     selected?: boolean;
+    opened: boolean;
     tagName: string;
     state: number;
     attributes: { name: string, value: string }[];
     children: (object | string)[]
   }} node
+ * @param {Function} update
  * @returns {HTMLDivElement}
  */
-function getNodeView(node) {
+function getNodeView(node, update) {
   const result = document.createElement("div");
   const title = document.createElement("div");
   title.classList.add("view__title");
@@ -80,16 +74,19 @@ function getNodeView(node) {
   if (node.children && node.children.length > 0) {
     title.classList.add("view__title-expandable");
 
-    const childrenTreeElement = getTreeView(node.children);
-    const expandMarkerElement = getExpandMarkerElement();
+    const expandMarkerElement = node.opened ? null : getExpandMarkerElement();
+    if (expandMarkerElement) {
+      title.appendChild(expandMarkerElement);
+    }
+    const childrenTreeElement = node.opened ? getTreeView(node.children, update) : null;
+    if (childrenTreeElement) {
+      result.appendChild(childrenTreeElement);
+    }
 
-    title.appendChild(expandMarkerElement);
     title.addEventListener("click", () => {
-      toggleElement(childrenTreeElement);
-      toggleElement(expandMarkerElement);
+      node.opened = !node.opened;
+      update();
     });
-
-    result.appendChild(childrenTreeElement);
   }
   return result;
 }
@@ -97,20 +94,21 @@ function getNodeView(node) {
 /**
  * @param {(string | {
     selected?: boolean;
+    opened: boolean;
     tagName: string;
     state: number;
     attributes: { name: string, value: string }[];
     children: (object | string)[]
   })[]} contentTree
-  @returns {HTMLDivElement}
+ * @param {Function} update
+ * @returns {HTMLDivElement}
  */
-function getTreeView(contentTree) {
+function getTreeView(contentTree, update) {
   const result = document.createElement("div");
   result.style.marginLeft = 20;
-  result.style.display = "block";
 
   contentTree.forEach(node => {
-    result.appendChild(getNodeView(node));
+    result.appendChild(getNodeView(node, update));
   });
 
   return result;
@@ -120,16 +118,17 @@ function getTreeView(contentTree) {
  * @param {HTMLDivElement} container
  * @param {(string | {
     selected?: boolean;
+    opened: boolean;
     tagName: string;
     state: number;
     attributes: { name: string, value: string }[];
     children: (object | string)[]
   })[]} contentTree
  */
-function updateView(container, contentTree) {
+function updateView(container, contentTree, update) {
   if (contentTree.length > 0) {
     container.innerHTML = "";
-    container.appendChild(getTreeView(contentTree));
+    container.appendChild(getTreeView(contentTree, update));
   }
 }
 
@@ -140,31 +139,31 @@ window.onload = () => {
   const search = document.getElementById("search");
   let contentTree = [];
 
+  const update = () => {
+    updateView(view, contentTree, update);
+  };
+
   search.addEventListener("keyup", () => {
-    const selectedTree = findAllBySelector(contentTree, search.value);
-    if (selectedTree) {
-      updateView(view, selectedTree);
-    }
+    findAllBySelector(contentTree, search.value);
+    update();
   });
 
   textarea.addEventListener("keyup", () => {
     error.innerHTML = "";
+    let visibility = "visible";
     try {
       contentTree = parseHtml(textarea.value);
-      updateView(view, contentTree);
+      update();
 
-      if (contentTree.length > 0) {
-        view.style.visibility = "visible";
-        search.style.visibility = "visible";
-      }
-      else {
+      if (contentTree.length === 0) {
         throw new Error(`Content tree is empty`);
       }
     }
     catch (e) {
-      view.style.visibility = "hidden";
-      search.style.visibility = "hidden";
+      visibility = "hidden";
       error.innerText = e.message;
     }
+    view.style.visibility = visibility;
+    search.style.visibility = visibility;
   });
 };
