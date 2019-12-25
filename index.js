@@ -46,6 +46,7 @@ function toggleElement(node) {
 
 /**
  * @param {string | {
+    selected?: boolean;
     tagName: string;
     state: number;
     attributes: { name: string, value: string }[];
@@ -57,6 +58,10 @@ function getNodeView(node) {
   const result = document.createElement("div");
   const title = document.createElement("div");
   title.classList.add("view__title");
+
+  if (node.selected) {
+    title.classList.add("view__title-selected");
+  }
 
   let titleContent;
   // if node is text
@@ -91,6 +96,7 @@ function getNodeView(node) {
 
 /**
  * @param {(string | {
+    selected?: boolean;
     tagName: string;
     state: number;
     attributes: { name: string, value: string }[];
@@ -110,20 +116,46 @@ function getTreeView(contentTree) {
   return result;
 }
 
+/**
+ * @param {HTMLDivElement} container
+ * @param {(string | {
+    selected?: boolean;
+    tagName: string;
+    state: number;
+    attributes: { name: string, value: string }[];
+    children: (object | string)[]
+  })[]} contentTree
+ */
+function updateView(container, contentTree) {
+  if (contentTree.length > 0) {
+    container.innerHTML = "";
+    container.appendChild(getTreeView(contentTree));
+  }
+}
+
 window.onload = () => {
   const textarea = document.getElementById("textarea");
   const error = document.getElementById("error");
   const view = document.getElementById("view");
+  const search = document.getElementById("search");
+  let contentTree = [];
+
+  search.addEventListener("keyup", () => {
+    const selectedTree = findAllBySelector(contentTree, search.value);
+    if (selectedTree) {
+      updateView(view, selectedTree);
+    }
+  });
 
   textarea.addEventListener("keyup", () => {
     error.innerHTML = "";
     try {
-      view.innerHTML = "";
-      const contentTree = parseHtml(textarea.value);
+      contentTree = parseHtml(textarea.value);
+      updateView(view, contentTree);
 
       if (contentTree.length > 0) {
-        view.appendChild(getTreeView(contentTree));
         view.style.visibility = "visible";
+        search.style.visibility = "visible";
       }
       else {
         throw new Error(`Content tree is empty`);
@@ -131,6 +163,7 @@ window.onload = () => {
     }
     catch (e) {
       view.style.visibility = "hidden";
+      search.style.visibility = "hidden";
       error.innerText = e.message;
     }
   });
