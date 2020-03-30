@@ -1,2 +1,2 @@
 # html-parser
-primitive html-parser, it recognises only `<html>` and `<div>` tags.
+primitive html-parser that recognises only `<html>` and `<div>` tags.
